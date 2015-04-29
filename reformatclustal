@@ -1,0 +1,17 @@
+#Jason Bosch; Gregor Mendel Institute, Vienna, Austria; 17 April 2015
+for INPUT in `ls` ; do 
+	BASENM=$(basename $INPUT) #Takes the part of the name after the directory
+	OUTPUT=${BASENM%.*}converted #Renames the file so we can distinguish between them
+
+	NUM=$(grep -Po "(?<=Nseq=).*?(?=\D)" $INPUT) #Finds the number of sequence by reading that part of the original file
+	SKIP=$((NUM+1)) #Takes into account that lines will also be seperated by the consensus score. Both how many lines to skip and how many times to repeat the procedure
+	INDEX=$(echo 1) #Which line are we working on now?
+	
+	for n in `seq 1 $SKIP` ; do #Will repeat the actions for every line in one sequence
+		LINES=$(echo $INDEX"~"$SKIP"p") #creates variable that specifies every nth line starting from the index position.
+		#next line excludes the header then removes the first 16 characters from the start of each line (gene name and blank spaces) then takes alternating lines as specified above then joins them together as a single line and appends it to the output file
+		grep -v "CLUSTAL" $INPUT | sed -n /"^.\{16\}"/s/"^.\{16\}"//p | sed -n $LINES | sed ':a;N;s/\n//;ta' >> $OUTPUT
+		INDEX=$((INDEX+1)) #Increases the index for the next line
+	done
+done
+

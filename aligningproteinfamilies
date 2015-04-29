@@ -1,0 +1,8 @@
+#Jason Bosch; Gregor Mendel Institute, Vienna, Austria; 17 April 2015
+#!/bin/bash
+count=0 #Running count to keep track of which file has been aligned.
+for j in `grep "um" UMgroups`; do #Uses grep to find the lines starting with a gene name group and treats each seperately
+	((count=count+1)) #Count must increase each time the loop runs.
+	rgrep -A1 $j umproteins.fasta | t_coffee -mode quickaln -infile=stdin -outfile=Family$count ; #Extracts the sequence of each gene in the group, pipes it to t-coffee which aligns them and outputs the file with the count number at the end of the file name.
+done
+

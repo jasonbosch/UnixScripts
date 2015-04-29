@@ -1,0 +1,25 @@
+#Jason Bosch; Gregor Mendel Institute, Vienna, Austria; 17 April 2015
+#!/bin/bash
+for INPUT in `ls` ; do 
+	touch maxconslenresult #creates the file for the results if it does not exist. You should manually delete the old file if you run the programme a second time.
+
+	LENGTH=$(rgrep -o "\**" $INPUT | awk 'length > max_length { max_length = length; longest_line = $0 } END { print longest_line }' |awk '{ print length }') #Searches the input for the longest possible stretch of stars (perfect match) and then returns the length.
+
+	EXP=$(echo "\*\{"$LENGTH"\}") #Creates a regular expression that reproduces the longest region.
+
+	POSITION=$(tail -1 $INPUT |grep -aob $EXP| head -1 | grep -oE '[0-9]+') #Checks the consensus part of the sequence to see where the match begins. NB: ONLY TAKES FIRST MATCH! If there are more than one region of the same length you will not find the others.
+	POS=$(($POSITION + 1)) #corrects for grep indexing starting from 0.
+
+	if [ $LENGTH -le 9 ] ; then
+		echo "$INPUT conserved region less than 9" #Can't create an antibody for target less than 9 amino acids long
+		continue
+	else
+
+		RESULT=$(expr substr `head -1 $INPUT` $POS $LENGTH) #substring of input file at position and with length
+
+		echo "$INPUT done"
+		echo "$INPUT, $LENGTH, $RESULT" >> maxconslenresult #Puts input file, length of match and sequence of match into a new file.
+	fi
+	
+ done
+
